@@ -39,16 +39,23 @@ app.marker = {
             }),
             render: (function(){
               
-            })
-          }
-          }
+            }),
+        }
+      }
 
 app.region = {
   model: {
     all: [],
     new: (function(){
-
-    }),
+      var counter = 0;
+      var region = function Region(marker){
+        this.id = ++counter;
+        this.marker = marker;
+        this.events = [];
+        app.region.model.all.push(this);
+       }
+        return region;
+        }()),
     delete: (function(){
 
     }),
@@ -60,8 +67,11 @@ app.region = {
     init: (function(){
 
     }),
-    render: (function(){
-      
+    render: (function(region){
+      // $('#regions').append(
+      //   "<h1>" + marker.id + "</h1>
+      //   "
+      //   )
     })
   }
 }
@@ -70,8 +80,17 @@ app.event = {
   model: {
     all: [],
     new: (function(){
-
-    }),
+      var counter = 0;
+      var event = function Event(content, source, createdAt, region){
+        this.id = ++counter;
+        this.content = content;
+        this.source = source;
+        this.createdAt = createdAt;
+        region.events.push(this);
+        app.event.model.all.push(this);
+       }
+        return event;
+        }()),
     delete: (function(){
 
     }),
@@ -85,10 +104,42 @@ app.event = {
     }),
     render: (function(){
       
-    })
+    }),
+
+      adapter: {
+    getBy: function(lat, long, region){
+      return $.ajax({
+        method: "GET",
+        url: "http://api.crisis.net/item?location=" + lat + "%2C" + long + "&distance=" + 500 + "&apikey=56fd9790d15eddf7785a9a75",
+      }).then(function(data){
+        // return events sorted by date
+
+      var sortedEvents = data.data.sort(function(a, b) {
+        if (a.createdAt < b.createdAt) {
+          return 1;
+        }
+        else if (a.createdAt > b.createdAt) {
+          return -1;
+        }
+        else {
+          return 0;
+        }
+      }).splice(0,10) // return 10 most recent events
+
+      sortedEvents.forEach(function(event){
+        var content = event.content;
+        var createdAt = event.createdAt;
+        var source = event.source;
+        new app.event.model.new(content, source, createdAt, region);
+      })
+
+      }
+      )
+    }
+  }
+  }
   }
 
-}
 
 // Google Map API //
 $(function(){
@@ -110,6 +161,10 @@ $(function(){
           var long = event.latLng.lng(); 
           addMarker(event.latLng, map);
           var mark = new app.marker.model.new(lat, long);
+          var region = new app.region.model.new(mark);
+          // content, source, createdAt, region
+          app.event.controller.adapter.getBy(mark.lat, mark.long, region);
+          app.region.controller.render(region);
 
         });
 
@@ -124,6 +179,17 @@ $(function(){
           position: location,
           label: labels[labelIndex++ % labels.length],
           map: map
+        });
+
+        var cityCircle = new google.maps.Circle({
+          strokeColor: '#FF0000',
+          strokeOpacity: 0.8,
+          strokeWeight: 2,
+          fillColor: '#FF0000',
+          fillOpacity: 0.35,
+          map: map,
+          center: location,
+          radius: 500000
         });
       }
 
