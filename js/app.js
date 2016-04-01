@@ -2,35 +2,46 @@ app = {};
 
 app.marker = {
   model: {
-    all: [],
-    new: (function(){
-      var counter = 0;
-      var marker = function Marker(lat, long){
-        this.id = ++counter;
-        this.lat = lat;
-        this.long = long;
-      }
-      return marker;
-    }),
-    find: (function(id){
+            all: [],
+            new: (function(){
+                      var counter = 0;
+                      var marker = function Marker(lat, long){
+                        this.id = ++counter;
+                        this.lat = lat;
+                        this.long = long;
+                        app.marker.model.all.push(this);
+                       }
+                return marker;
+                }()),
 
-    }),
-    delete: (function(){
 
-    }),
-  },
-  controller: {
-    new: (function(){
+            find: (function(id){ 
+                return $.grep(app.marker.model.all, function(mark){
+                     return mark.id === id })[0]
 
-    }),
-    init: (function(){
+            }),
 
-    }),
-    render: (function(){
-      
-    })
-  }
-}
+            delete: (function(id){
+              var marker;
+              var index;
+              marker = app.marker.model.find(id);
+              index= app.marker.model.all.indexOf(marker);
+              return app.marker.model.all.splice(index, 1);
+            }),
+
+          },
+          controller: {
+            new: (function(){
+
+            }),
+            init: (function(){
+
+            }),
+            render: (function(){
+              
+            })
+          }
+          }
 
 app.region = {
   model: {
@@ -76,7 +87,10 @@ app.event = {
       
     })
   }
+
 }
+
+// Google Map API //
 $(function(){
       // In the following example, markers appear when the user clicks on the map.
       // Each marker is labeled with a single alphabetical character.
@@ -92,9 +106,11 @@ $(function(){
 
         // This event listener calls addMarker() when the map is clicked.
         google.maps.event.addListener(map, 'click', function(event) {
-          console.log(event.latLng.lat());
-          console.log(event.latLng.lng());
+          var lat = event.latLng.lat();
+          var long = event.latLng.lng(); 
           addMarker(event.latLng, map);
+          var mark = new app.marker.model.new(lat, long);
+
         });
 
         // Add a marker at the center of the map.
