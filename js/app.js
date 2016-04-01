@@ -77,6 +77,7 @@ app.event = {
     })
   }
 }
+$(function(){
       // In the following example, markers appear when the user clicks on the map.
       // Each marker is labeled with a single alphabetical character.
       var labels = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -111,3 +112,5 @@ app.event = {
       }
 
       google.maps.event.addDomListener(window, 'load', initialize);
+
+})
