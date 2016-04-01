@@ -1,19 +1,24 @@
-<div class="container">
-  <ul>
-  </ul>
-</div>
-
-<form >
-  <h1> News Events </h1>
-  <label for="">Location</label>
-  <input type="text" name="student[hometown]">
-  </p>
-  <input type="submit">
-</form>
-
-<script type="text/javascript" src="lib/jquery-1.11.3.js"></script>
-<script type="text/javascript" src="app/app.js"></script>
-<script type="text/javascript" src="app/classroom.js"></script>
-<script type="text/javascript" src="app/student.js"></script>
-<script type="text/javascript" src="app/controllers/studentsController.js"></script>
-<script type="text/javascript" src="seed.js"></script>
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+    <meta charset="utf-8">
+    <title>Marker Labels</title>
+    <style>
+      html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+      #map {
+        height: 75%;
+      }
+    </style>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCSYWt1X_g40Fp1RdznJu2eAP1c0_0cUGM"></script>
+    <script src="js/app.js"></script>
+  </head>
+  <body>
+    <div id="map"></div>
+    <div> Regions: <div id="regions"></div></div>
+  </body>
+</html>
