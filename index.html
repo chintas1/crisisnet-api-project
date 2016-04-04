@@ -16,18 +16,36 @@
     </style>
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCSYWt1X_g40Fp1RdznJu2eAP1c0_0cUGM"></script>
     <script src="js/lib/jquery-1.11.3.js"></script>
+    <script src="js/lib/handlebars-v4.0.5.js"></script>
     <script src="js/app.js"></script>
   </head>
 
   <body>
     <div id="map"></div>
+       <script id = "region-template" type="text/x-handlebars-template">
+          {{#each regions as |region|}}
+            <div id={{region.symbol}}>
+              <h1>{{region.symbol}}</h1>
+              <table border="1">
+              <tr>
+                <td>Date</td>
+                <td>Content</td>
+                <td>Source</td>
+              </tr>
+                {{#each region.events as |event|}}
+                  <tr>
+                    <td>{{event.createdAt}}</td>
+                    <td>{{event.content}}</td>
+                    <td>{{event.source}}</td>
+                  </tr>
+                {{/each}}
+              </table>
+            </div>
+          {{/each}}
+        </script>
+      <div id="regions">
 
-      <div>
-     //this is where data gets displayed //
-
-
-
-  </div>
+      </div>
   </div>
 
   

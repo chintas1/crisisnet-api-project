@@ -5,10 +5,11 @@ app.marker = {
             all: [],
             new: (function(){
                       var counter = 0;
-                      var marker = function Marker(lat, long){
+                      var marker = function Marker(lat, long, google_mark){
                         this.id = ++counter;
                         this.lat = lat;
                         this.long = long;
+                        this.google_mark = google_mark;
                         app.marker.model.all.push(this);
                        }
                 return marker;
@@ -50,6 +51,7 @@ app.region = {
       var counter = 0;
       var region = function Region(marker){
         this.id = ++counter;
+        this.symbol = marker.google_mark.label;
         this.marker = marker;
         this.events = [];
         app.region.model.all.push(this);
@@ -68,10 +70,10 @@ app.region = {
 
     }),
     render: (function(region){
-      // $('#regions').append(
-      //   "<h1>" + marker.id + "</h1>
-      //   "
-      //   )
+      var source = $("#region-template").html();
+      var template = Handlebars.compile(source);
+      var html = template({regions: app.region.model.all});
+      $('#regions').html(html);
     })
   }
 }
@@ -85,7 +87,7 @@ app.event = {
         this.id = ++counter;
         this.content = content;
         this.source = source;
-        this.createdAt = createdAt;
+        this.createdAt = createdAt.slice(0,10);
         region.events.push(this);
         app.event.model.all.push(this);
        }
@@ -114,27 +116,26 @@ app.event = {
       }).then(function(data){
         // return events sorted by date
 
-      var sortedEvents = data.data.sort(function(a, b) {
-        if (a.createdAt < b.createdAt) {
-          return 1;
-        }
-        else if (a.createdAt > b.createdAt) {
-          return -1;
-        }
-        else {
-          return 0;
-        }
-      }).splice(0,10) // return 10 most recent events
+        var sortedEvents = data.data.sort(function(a, b) {
+          if (a.createdAt < b.createdAt) {
+            return 1;
+          }
+          else if (a.createdAt > b.createdAt) {
+            return -1;
+          }
+          else {
+            return 0;
+          }
+        }).splice(0,10) // return 10 most recent events
 
-      sortedEvents.forEach(function(event){
-        var content = event.content;
-        var createdAt = event.createdAt;
-        var source = event.source;
-        new app.event.model.new(content, source, createdAt, region);
+        sortedEvents.forEach(function(event){
+          var content = event.content;
+          var createdAt = event.createdAt;
+          var source = event.source;
+          new app.event.model.new(content, source, createdAt, region);
+        })
+
       })
-
-      }
-      )
     }
   }
   }
@@ -151,7 +152,7 @@ $(function(){
       function initialize() {
         var initial = { lat: 40.70601833122571, lng: -74.01394844055176 };
         var map = new google.maps.Map(document.getElementById('map'), {
-          zoom: 12,
+          zoom: 5,
           center: initial
         });
 
@@ -159,13 +160,12 @@ $(function(){
         google.maps.event.addListener(map, 'click', function(event) {
           var lat = event.latLng.lat();
           var long = event.latLng.lng(); 
-          addMarker(event.latLng, map);
-          var mark = new app.marker.model.new(lat, long);
+          var mark = new app.marker.model.new (lat, long, addMarker(event.latLng, map));
           var region = new app.region.model.new(mark);
           // content, source, createdAt, region
-          app.event.controller.adapter.getBy(mark.lat, mark.long, region);
-          app.region.controller.render(region);
-
+          app.event.controller.adapter.getBy(mark.lat, mark.long, region).then(function(){
+            app.region.controller.render(region);
+          })
         });
 
         // Add a marker at the center of the map.
@@ -191,6 +191,8 @@ $(function(){
           center: location,
           radius: 500000
         });
+
+        return marker;
       }
 
       google.maps.event.addDomListener(window, 'load', initialize);
